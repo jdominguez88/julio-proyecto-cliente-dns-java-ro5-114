@@ -28,18 +28,19 @@ public class ResourceRecord {
 
     static public ResourceRecord createResourceRecord(final byte[] rrecord, final byte[] message) throws Exception {
         ResourceRecord temp = new ResourceRecord(rrecord, message);
-        
+
         switch (temp.getRRType()) {
             case A:
-                return new AResourceRecord(temp, rrecord, message);
+                return new AResourceRecord(temp);
             case AAAA:
-                return new AAAAResourceRecord(temp, rrecord, message);
+                return new AAAAResourceRecord(temp);
             case NS:
-                return new NSResourceRecord(temp, rrecord, message);
+                return new NSResourceRecord(temp, message);
             default:
-                throw new Exception("Unhandled type: " + temp.getRRType());
+                return temp;
         }
     }
+
     private final DomainName domain;
     private final RRType rrtype;
     private final RRClass rrclass;
@@ -47,12 +48,12 @@ public class ResourceRecord {
     private final int rdlength;
     private final byte[] rrdata;
 
-    protected ResourceRecord(DomainName domain, RRType type, int ttl, int rdlength, final byte[] rrdata) {
+    protected ResourceRecord(DomainName domain, RRType type, int ttl, final byte[] rrdata) {
         this.domain = domain;
         this.rrtype = type;
         this.rrclass = RRClass.IN;
         this.ttl = ttl;
-        this.rdlength = rdlength;
+        this.rdlength = rrdata.length;
         this.rrdata = rrdata;
     }
 

@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.util.Arrays;
 
 /**
  *
@@ -31,12 +30,12 @@ public class AAAAResourceRecord extends ResourceRecord {
     private final Inet6Address addr;    
 
     public AAAAResourceRecord(DomainName domain, int ttl, Inet6Address addr) {
-        super(domain, AAAA, ttl, 16);
+        super(domain, AAAA, ttl, addr.getAddress());
 
         this.addr = addr;        
     }
 
-    protected AAAAResourceRecord(ResourceRecord decoded, final byte[] rrecord, final byte[] message) throws Exception {
+    protected AAAAResourceRecord(ResourceRecord decoded) throws Exception {
         super(decoded);
 
         int index = commonSize();
@@ -45,7 +44,7 @@ public class AAAAResourceRecord extends ResourceRecord {
             throw new Exception("Incorrect rdlength for A Resource Records");
         }
 
-        InetAddress ad = InetAddress.getByAddress(Arrays.copyOfRange(rrecord, index, index + getRDLength()));
+        InetAddress ad = InetAddress.getByAddress(getRRData());
         if (!(ad instanceof Inet6Address)) {
             throw new Exception("Address is not a valid IPv6 Address");
         }

@@ -19,7 +19,6 @@ package es.uvigo.det.ro.simpledns;
 import static es.uvigo.det.ro.simpledns.RRType.NS;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  *
@@ -29,17 +28,15 @@ public class NSResourceRecord extends ResourceRecord {
     private final DomainName ns;
 
     public NSResourceRecord(DomainName domain, int ttl, DomainName ns) {
-        super(domain, NS, ttl, ns.getEncodedLength());
+        super(domain, NS, ttl, ns.toByteArray());
         
         this.ns = ns;
     }
 
-    protected NSResourceRecord(ResourceRecord decoded, final byte[] rrecord, final byte[] message) {
+    protected NSResourceRecord(ResourceRecord decoded, final byte[] message) {
         super(decoded);
 
-        int index = commonSize();
-
-        ns = new DomainName(Arrays.copyOfRange(rrecord, index, index + getRDLength()), message);
+        ns = new DomainName(getRRData(), message);
     }
 
     public final DomainName getNS() {

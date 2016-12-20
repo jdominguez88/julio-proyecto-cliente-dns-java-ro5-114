@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.util.Arrays;
 
 /**
  *
@@ -31,21 +30,19 @@ public class AResourceRecord extends ResourceRecord {
     private final Inet4Address addr;
 
     public AResourceRecord(DomainName domain, int ttl, Inet4Address addr) {
-        super(domain, A, ttl, 4);
+        super(domain, A, ttl, addr.getAddress());
 
         this.addr = addr;
     }
 
-    protected AResourceRecord(ResourceRecord decoded, final byte[] rrecord, final byte[] message) throws Exception {
-        super(decoded);
-
-        int index = commonSize();
+    protected AResourceRecord(ResourceRecord decoded) throws Exception {
+        super(decoded);        
        
         if (getRDLength() != 4) {
             throw new Exception("Incorrect rdlength for A Resource Records");
         }
 
-        InetAddress ad = InetAddress.getByAddress(Arrays.copyOfRange(rrecord, index, index + getRDLength()));
+        InetAddress ad = InetAddress.getByAddress(getRRData());
         if (!(ad instanceof Inet4Address)) {
             throw new Exception("Address is not a valid IPv4 Address");
         }
