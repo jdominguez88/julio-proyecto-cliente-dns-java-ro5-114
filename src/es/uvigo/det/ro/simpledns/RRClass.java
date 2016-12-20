@@ -18,7 +18,7 @@ package es.uvigo.det.ro.simpledns;
 
 /**
  *
- * @author Miguel Rodriguez Perez <miguel@det.uvigo.gal>
+ * @author Miguel Rodriguez Perez
  */
 public enum RRClass {
     IN(1), // the Internet

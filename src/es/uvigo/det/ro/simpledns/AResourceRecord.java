@@ -21,10 +21,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
- * @author Miguel Rodriguez Perez <miguel@det.uvigo.gal>
+ * @author Miguel Rodriguez Perez
  */
 public class AResourceRecord extends ResourceRecord {
     private final Inet4Address addr;
@@ -55,12 +57,17 @@ public class AResourceRecord extends ResourceRecord {
     }
     
     @Override
-    public byte[] toByteArray() throws IOException {
+    public byte[] toByteArray() {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        os.write(super.toByteArray());
-        os.write(addr.getAddress());
-
+        
+        try {                        
+            os.write(super.toByteArray());
+            os.write(addr.getAddress());                        
+        } catch (IOException ex) {
+            Logger.getLogger(AResourceRecord.class.getName()).log(Level.SEVERE, null, ex);
+            System.exit(-1);
+        }
+        
         return os.toByteArray();
     }    
 }

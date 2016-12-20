@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Miguel Rodriguez Perez <miguel@det.uvigo.gal>
+ * @author Miguel Rodriguez Perez
  */
 public class DomainName {
 
@@ -83,6 +83,7 @@ public class DomainName {
                 bo.write(label.getBytes(ASCII));
             } catch (IOException ex) {
                 Logger.getLogger(DomainName.class.getName()).log(Level.SEVERE, null, ex);
+                System.exit(-1);
             }
         });
         bo.write(0); // Final label
@@ -101,8 +102,8 @@ public class DomainName {
     }
 
     private void setEncodedLength(int i) {
-        if (encoded_length < 0) {
-            encoded_length = i; // Not recorded yet
+        if (encoded_length < 0) { // Not recorded yet
+            encoded_length = i; 
         }
     }
 }

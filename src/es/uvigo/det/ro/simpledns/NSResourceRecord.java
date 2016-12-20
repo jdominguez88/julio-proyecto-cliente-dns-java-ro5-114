@@ -19,10 +19,12 @@ package es.uvigo.det.ro.simpledns;
 import static es.uvigo.det.ro.simpledns.RRType.NS;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
- * @author Miguel Rodriguez Perez <miguel@det.uvigo.gal>
+ * @author Miguel Rodriguez Perez
  */
 public class NSResourceRecord extends ResourceRecord {
     private final DomainName ns;
@@ -44,12 +46,16 @@ public class NSResourceRecord extends ResourceRecord {
     }
     
     @Override
-    public byte[] toByteArray() throws IOException {
+    public byte[] toByteArray() {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         
-        os.write(super.toByteArray());
-        
-        os.write(ns.toByteArray());
+        try {        
+            os.write(super.toByteArray());
+            os.write(ns.toByteArray());
+        } catch (IOException ex) {
+            Logger.getLogger(NSResourceRecord.class.getName()).log(Level.SEVERE, null, ex);
+            System.exit(-1);
+        }        
         
         return os.toByteArray();
     }

@@ -19,13 +19,23 @@ package es.uvigo.det.ro.simpledns;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
- * @author Miguel Rodriguez Perez <miguel@det.uvigo.gal>
+ * @author Miguel Rodriguez Perez
  */
 public class ResourceRecord {
 
+    /**
+     * Creates a new ResourceRecord based on a byte array
+     *
+     * @param rrecord A byte array with the serialized RR
+     * @param message A byte array containing the complete message
+     * @return A ResourceRecord of the appropriate type
+     * @throws Exception in case the bytes cannot be fully parsed
+     */
     static public ResourceRecord createResourceRecord(final byte[] rrecord, final byte[] message) throws Exception {
         ResourceRecord temp = new ResourceRecord(rrecord, message);
 
@@ -86,18 +96,29 @@ public class ResourceRecord {
         this.rrdata = copy.rrdata;
     }
 
+    /**
+     * Required size to serialize the Resource Record
+     *
+     * @return the number of bytes needed
+     */
     public int getEncodedLength() {
         return commonSize() + getRDLength();
     }
 
-    protected byte[] toByteArray() throws IOException {
+    protected byte[] toByteArray() {
         ByteArrayOutputStream os = new ByteArrayOutputStream(commonSize());
 
-        os.write(domain.toByteArray());
-        os.write(rrtype.toByteArray());
-        os.write(rrclass.toByteArray());
-        os.write(Utils.int32toByteArray(ttl));
-        os.write(Utils.int16toByteArray(rdlength));
+        try {
+            os.write(domain.toByteArray());
+            os.write(rrtype.toByteArray());
+            os.write(rrclass.toByteArray());
+            os.write(Utils.int32toByteArray(ttl));
+            os.write(Utils.int16toByteArray(rdlength));
+        } catch (IOException ex) {
+            // This Exception should not happen ever
+            Logger.getLogger(ResourceRecord.class.getName()).log(Level.SEVERE, null, ex);
+            System.exit(-1);
+        }
 
         return os.toByteArray();
     }
@@ -106,26 +127,59 @@ public class ResourceRecord {
         return domain.getEncodedLength() + 2 + 2 + 4 + 2; // type + class + ttl + rdlength
     }
 
+    /**
+     * The DomainName of the ResourceRecord
+     *
+     * @return
+     */
     public final DomainName getDomain() {
         return domain;
     }
 
+    /**
+     * The Type of the ResourceRecourd
+     *
+     * @return
+     */
     public final RRType getRRType() {
         return rrtype;
     }
 
+    /**
+     * The class of the Resource Record
+     *
+     * @return
+     */
     public final RRClass getRRClass() {
         return rrclass;
     }
 
+    /**
+     * The TTL (in seconds) of the ResourceRecord. Note that this field is not
+     * updated by this class. Care must be taken to update it if it is to be
+     * stored in a cache object.
+     *
+     * @return
+     */
     public final int getTTL() {
         return ttl;
     }
 
+    /**
+     * Number of bytes required to hold the RRData
+     *
+     * @return
+     */
     public final int getRDLength() {
         return rdlength;
     }
 
+    /**
+     * Undecoded data in this ResourceRecord. Needed if the type is not
+     * supported by this library.
+     *
+     * @return
+     */
     public final byte[] getRRData() {
         return rrdata;
     }

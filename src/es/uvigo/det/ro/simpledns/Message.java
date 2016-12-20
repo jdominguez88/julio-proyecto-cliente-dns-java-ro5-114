@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  *
- * @author Miguel Rodriguez Perez <miguel@det.uvigo.gal>
+ * @author Miguel Rodriguez Perez
  */
 public class Message {
 
@@ -39,10 +39,24 @@ public class Message {
     private final List<ResourceRecord> additionalRecords;
     private final MessageOptions options;
 
+    /**
+     * Constructs a message of the given type
+     *
+     * @param question The Domain to ask for
+     * @param type The type of the query of type
+     * @param recursion Wether recursion is desired
+     */
     public Message(String question, RRType type, boolean recursion) {
         this(new DomainName(question), type, recursion);
     }
 
+    /**
+     * Constructs a message of the given type
+     *
+     * @param question The Domain to ask for
+     * @param type The type of the query of type
+     * @param recursion Wether recursion is desired
+     */
     public Message(DomainName question, RRType type, boolean recursion) {
         this(question, type, new ArrayList<ResourceRecord>(0), new ArrayList<ResourceRecord>(0), new ArrayList<ResourceRecord>(0), recursion);
     }
@@ -63,6 +77,12 @@ public class Message {
         messageId = Utils.int16fromByteArray(id_bytes);
     }
 
+    /**
+     * Constructs a message from a byte array
+     *
+     * @param messageBytes the bytes forming the complete message
+     * @throws Exception in case the Message cannot be parsed
+     */
     public Message(final byte[] messageBytes) throws Exception {
         byte[] buffer = messageBytes;
         final int length = messageBytes.length;
@@ -72,7 +92,11 @@ public class Message {
 
         options = new MessageOptions(buffer);
         buffer = Arrays.copyOfRange(buffer, 2, length);
-     
+
+        if (options.getTC()) {
+            throw new Exception("We do not know what to do with truncated responses");
+        }
+
         int qcount, acount, nscount, adcount;
         qcount = Utils.int16fromByteArray(buffer);
         buffer = Arrays.copyOfRange(buffer, 2, length);
@@ -211,8 +235,8 @@ public class Message {
         }
 
         byte[] toByteArray() {
-            final int options = getRCODE() | getZ() << 4 | getRA() << 7 | getRD() << 8 | getTC() << 9
-                    | getAA() << 10 | getOPCODE() << 11 | getQR() << 15;
+            final int options = RCODE | Z << 4 | RA << 7 | RD << 8 | TC << 9
+                    | AA << 10 | OPCODE << 11 | QR << 15;
 
             return Utils.int16toByteArray(options);
         }
@@ -229,8 +253,8 @@ public class Message {
         /**
          * @return the QR
          */
-        public int getQR() {
-            return QR;
+        public boolean getQR() {
+            return QR > 0;
         }
 
         /**
@@ -238,6 +262,13 @@ public class Message {
          */
         public void setQR(int QR) {
             this.QR = QR;
+        }
+
+        /**
+         * @param QR the QR to set
+         */
+        public void setQR(boolean QR) {
+            this.QR = QR ? 1 : 0;
         }
 
         /**
@@ -257,22 +288,22 @@ public class Message {
         /**
          * @return the AA
          */
-        public int getAA() {
-            return AA;
+        public boolean getAA() {
+            return AA > 0;
         }
 
         /**
          * @return the TC
          */
-        public int getTC() {
-            return TC;
+        public boolean getTC() {
+            return TC != 0;
         }
 
         /**
          * @return the RD
          */
-        public int getRD() {
-            return RD;
+        public boolean getRD() {
+            return RD != 0;
         }
 
         /**
@@ -283,10 +314,17 @@ public class Message {
         }
 
         /**
+         * @param RD the RD to set
+         */
+        public void setRD(boolean RD) {
+            this.RD = RD ? 1 : 0;
+        }
+
+        /**
          * @return the RA
          */
-        public int getRA() {
-            return RA;
+        public boolean getRA() {
+            return RA > 0;
         }
 
         /**
