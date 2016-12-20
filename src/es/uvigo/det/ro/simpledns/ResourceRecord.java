@@ -45,13 +45,15 @@ public class ResourceRecord {
     private final RRClass rrclass;
     private final int ttl;
     private final int rdlength;
+    private final byte[] rrdata;
 
-    protected ResourceRecord(DomainName domain, RRType type, int ttl, int rdlength) {
+    protected ResourceRecord(DomainName domain, RRType type, int ttl, int rdlength, final byte[] rrdata) {
         this.domain = domain;
         this.rrtype = type;
         this.rrclass = RRClass.IN;
         this.ttl = ttl;
         this.rdlength = rdlength;
+        this.rrdata = rrdata;
     }
 
     protected ResourceRecord(final byte[] record, final byte[] message) throws Exception {
@@ -70,14 +72,17 @@ public class ResourceRecord {
         buffer = Arrays.copyOfRange(buffer, 4, record.length);
 
         rdlength = Utils.int16fromByteArray(buffer);
+
+        rrdata = Arrays.copyOfRange(buffer, 2, 2 + rdlength);
     }
-    
+
     protected ResourceRecord(ResourceRecord copy) {
         this.domain = copy.domain;
         this.rrtype = copy.rrtype;
         this.rrclass = copy.rrclass;
         this.ttl = copy.ttl;
         this.rdlength = copy.rdlength;
+        this.rrdata = copy.rrdata;
     }
 
     public int getEncodedLength() {
@@ -118,5 +123,9 @@ public class ResourceRecord {
 
     public final int getRDLength() {
         return rdlength;
+    }
+
+    public final byte[] getRRData() {
+        return rrdata;
     }
 }
