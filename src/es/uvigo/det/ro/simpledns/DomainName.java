@@ -59,7 +59,7 @@ public class DomainName {
             }
 
             if ((size & 0xc0) == 0xc0) { // Pointer
-                int offset = (domain[i++] & 0xff) + ((size & 0x37) << 8);
+                int offset = (domain[i++] & 0xff) + ((size & 0x3f) << 8);
                 setEncodedLength(i);
 
                 fromByteArray(Arrays.copyOfRange(message, offset, message.length), message);
