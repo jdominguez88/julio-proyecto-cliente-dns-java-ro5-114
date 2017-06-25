@@ -1,5 +1,9 @@
+*.sh
 *~
 build/
 dist/
 nbproject/
 manifest.mf
+.idea/
+out
+*.iml

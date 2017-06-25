@@ -26,84 +26,83 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author Miguel Rodriguez Perez
  */
 public class DomainName {
 
-    private final static Charset ASCII = Charset.forName("US-ASCII");
-    private final List<String> labels = new ArrayList<>();
-    private int encoded_length = -1;
+	private final static Charset ASCII = Charset.forName("US-ASCII");
+	private final List<String> labels = new ArrayList<>();
+	private int encoded_length = -1;
 
-    public DomainName(String domain) {
-        labels.addAll(Arrays.asList(domain.split("\\.")));
-    }
+	public DomainName(String domain) {
+		labels.addAll(Arrays.asList(domain.split("\\.")));
+	}
 
-    public DomainName(byte[] domain, byte[] message) {
-        fromByteArray(domain, message);
-    }
+	public DomainName(byte[] domain, byte[] message) {
+		fromByteArray(domain, message);
+	}
 
-    @Override
-    public String toString() {
-        String res = "";
-        
-        return labels.stream().map((label) -> label + '.').reduce(res, String::concat);        
-    }
+	@Override
+	public String toString() {
+		String res = "";
 
-    private void fromByteArray(final byte[] domain, final byte[] message) {
-        int i = 0;
-        while (i < domain.length) {
-            int size = (domain[i++] & 0xff);
-            if (size == 0) {
-                break;
-            }
+		return labels.stream().map((label) -> label + '.').reduce(res, String::concat);
+	}
 
-            if ((size & 0xc0) == 0xc0) { // Pointer
-                int offset = (domain[i++] & 0xff) + ((size & 0x3f) << 8);
-                setEncodedLength(i);
+	private void fromByteArray(final byte[] domain, final byte[] message) {
+		int i = 0;
+		while (i < domain.length) {
+			int size = (domain[i++] & 0xff);
+			if (size == 0) {
+				break;
+			}
 
-                fromByteArray(Arrays.copyOfRange(message, offset, message.length), message);
+			if ((size & 0xc0) == 0xc0) { // Pointer
+				int offset = (domain[i++] & 0xff) + ((size & 0x3f) << 8);
+				setEncodedLength(i);
 
-                return;
-            }
+				fromByteArray(Arrays.copyOfRange(message, offset, message.length), message);
 
-            String label = new String(Arrays.copyOfRange(domain, i, i + size), ASCII);
-            i += size;
-            labels.add(label);
-        }
+				return;
+			}
 
-        setEncodedLength(i);
-    }
+			String label = new String(Arrays.copyOfRange(domain, i, i + size), ASCII);
+			i += size;
+			labels.add(label);
+		}
 
-    public byte[] toByteArray() {
-        ByteArrayOutputStream bo = new ByteArrayOutputStream(labels.size() * 5); // A good approximation to final size
-        labels.forEach((label) -> {
-            try {
-                bo.write(label.length());
-                bo.write(label.getBytes(ASCII));
-            } catch (IOException ex) {
-                Logger.getLogger(DomainName.class.getName()).log(Level.SEVERE, null, ex);
-                System.exit(-1);
-            }
-        });
-        bo.write(0); // Final label
+		setEncodedLength(i);
+	}
 
-        return bo.toByteArray();
-    }
+	public byte[] toByteArray() {
+		ByteArrayOutputStream bo = new ByteArrayOutputStream(labels.size() * 5); // A good approximation to final size
+		labels.forEach((label) -> {
+			try {
+				bo.write(label.length());
+				bo.write(label.getBytes(ASCII));
+			} catch (IOException ex) {
+				Logger.getLogger(DomainName.class.getName()).log(Level.SEVERE, null, ex);
+				System.exit(-1);
+			}
+		});
+		bo.write(0); // Final label
 
-    public int getEncodedLength() {
-        if (encoded_length < 0) {
-            encoded_length = labels.size(); // 1 byte for each label for its size
-            labels.forEach((label) -> {
-                encoded_length += label.length();
-            });
-        }
-        return encoded_length;
-    }
+		return bo.toByteArray();
+	}
 
-    private void setEncodedLength(int i) {
-        if (encoded_length < 0) { // Not recorded yet
-            encoded_length = i; 
-        }
-    }
+	public int getEncodedLength() {
+		if (encoded_length < 0) {
+			encoded_length = labels.size(); // 1 byte for each label for its size
+			labels.forEach((label) -> {
+				encoded_length += label.length();
+			});
+		}
+		return encoded_length;
+	}
+
+	private void setEncodedLength(int i) {
+		if (encoded_length < 0) { // Not recorded yet
+			encoded_length = i;
+		}
+	}
 }

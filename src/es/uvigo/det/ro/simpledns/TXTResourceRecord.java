@@ -18,31 +18,31 @@ package es.uvigo.det.ro.simpledns;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static es.uvigo.det.ro.simpledns.RRType.NS;
+/*
+	+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    /                   TXT-DATA                    /
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 
-/**
- * @author Miguel Rodriguez Perez
- */
-public class NSResourceRecord extends ResourceRecord {
-	private final DomainName ns;
+where:
 
-	public NSResourceRecord(DomainName domain, int ttl, DomainName ns) {
-		super(domain, NS, ttl, ns.toByteArray());
+TXT-DATA        One or more <character-string>s.
+*/
 
-		this.ns = ns;
-	}
+public class TXTResourceRecord extends ResourceRecord {
+	private String text = "";
 
-	protected NSResourceRecord(ResourceRecord decoded, final byte[] message) {
+	protected TXTResourceRecord(ResourceRecord decoded) {
 		super(decoded);
 
-		ns = new DomainName(getRRData(), message);
+		text = new String(Arrays.copyOfRange(decoded.getRRData(), 1, decoded.getRDLength()));
 	}
 
-	public final DomainName getNS() {
-		return ns;
+	public final String getText() {
+		return text;
 	}
 
 	@Override
@@ -51,12 +51,17 @@ public class NSResourceRecord extends ResourceRecord {
 
 		try {
 			os.write(super.toByteArray());
-			os.write(ns.toByteArray());
+			os.write(text.getBytes());
 		} catch (IOException ex) {
-			Logger.getLogger(NSResourceRecord.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(TXTResourceRecord.class.getName()).log(Level.SEVERE, null, ex);
 			System.exit(-1);
 		}
 
 		return os.toByteArray();
+	}
+
+	@Override
+	public String toString() {
+		return getText();
 	}
 }
